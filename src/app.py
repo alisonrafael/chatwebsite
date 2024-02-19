@@ -1,5 +1,5 @@
-# pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb
-# create .streamlit/secrets.toml file with OPENAI_API_KEY="???"
+# instale as bibliotecas com pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb
+# crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???"
 
 import streamlit as st
 import os
@@ -13,10 +13,11 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
-
 load_dotenv()
 
-def get_vectorstore_from_url_test():
+OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+
+def get_vectorstore_from_url_daa():
     text_splitter = RecursiveCharacterTextSplitter()
 
     loader = WebBaseLoader("http://www.daa.uem.br")
@@ -230,7 +231,7 @@ def get_vectorstore_from_url(url):
     return vector_store
 
 def get_context_retriever_chain(vector_store):
-    llm = ChatOpenAI(openai_api_key=st.secrets("OPENAI_API_KEY"))
+    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
     
     retriever = vector_store.as_retriever()
     
@@ -244,9 +245,9 @@ def get_context_retriever_chain(vector_store):
     
     return retriever_chain
     
-def get_conversational_rag_chain(retriever_chain): 
+def get_conversational_rag_chain(retriever_chain):
     
-    llm = ChatOpenAI(openai_api_key=st.secrets("OPENAI_API_KEY"))
+    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
     
     prompt = ChatPromptTemplate.from_messages([
       ("system", "Answer the user's questions based on the below context:\n\n{context}"),
@@ -291,7 +292,7 @@ if "chat_history" not in st.session_state:
         AIMessage(content="Olá, eu sou o robô da DAA. Como posso te ajudar?"),
     ]
 if "vector_store" not in st.session_state:
-    st.session_state.vector_store = get_vectorstore_from_url_test()
+    st.session_state.vector_store = get_vectorstore_from_url_daa()
 
 # user input
 user_query = st.chat_input("Escreva sua pergunta aqui...")
