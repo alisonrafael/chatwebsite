@@ -1,6 +1,8 @@
 # pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb
+# create .streamlit/secrets.toml file with OPENAI_API_KEY="???"
 
 import streamlit as st
+import os
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -13,6 +15,205 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 
 
 load_dotenv()
+
+def get_vectorstore_from_url_test():
+    text_splitter = RecursiveCharacterTextSplitter()
+
+    loader = WebBaseLoader("http://www.daa.uem.br")
+    document = loader.load()
+    document_chunks = text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/transferencia-externa")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/transferencia-interna-de-turno-campus-polo-e-curso")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/transferencia-da-uem-para-outra-instituicao-de-ensino-superior")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/servidores-equipe-daa")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/horarios-2023")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/calendario-academico")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/editais-e-portarias/editais-e-portarias-2024")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/taxas-e-requerimentos")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/taxas-e-requerimentos/graduacao/requerimentos-academicos")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/revalidacao-de-diploma-estrangeiro-graduacao-1")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/contatos-e-servicos")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/aproveitamento-de-estudos-de-disciplinas-cursadas-na-uem")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/aproveitamento-de-estudos-de-disciplinas-cursadas-em-outra-instituicao")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/pas-vestibular")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/sisu")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/vestibular-ead")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/vagas-remanescentes")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/programa-de-estudantes-convenio-de-graduacao-peg-g")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/aluno-indigena")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/ex-officio")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/reingresso-de-alunos-desligados")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/estude-na-uem/portador-de-diploma")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/solicitacoes/informacoes-sobre-solicitacao-de-carteirinha")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/formatura/colacao-de-grau")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/formatura/solicitacao-de-colacao-de-grau-especial-e-antecipada")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/solicitacoes/historico-escolar")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/taxas-e-requerimentos/graduacao")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/historico-escola-oficial")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/permuta-de-turno")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/revalidacao-de-diploma-estrangeiro-graduacao-1")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/ajustes-de-matricula/ajuste-dematricula-em-disciplinas-turmas")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/horarios-de-aulas-orientacoes")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/renovacao-de-matricula-1/renovacao-de-matricula")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.scs.uem.br/2019/cep/022cep2019.htm")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/reserva-esporadica-de-sala-de-aula/reserva-esporadica-de-sala-de-aula-orientacoes")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/renovacao-de-retardatario/renovacao-de-retardatario-2021-orientacoes")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/atividade-domiciliar")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/dispensa-para-jogos")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/emissao-de-programas-de-disciplinas-ementas-curriculares-criterios-de-avaliacao")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/graduacao/informacoes-sobre-secretaria/plano-de-acompanhamento-de-estudos-pae")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/pos-graduacao/orientacoes-gerais-para-solicitacoes-1/historico-escolar-oficial")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/pos-graduacao/orientacoes-gerais-para-solicitacoes-1/atestado-de-matricula-oficial")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/pos-graduacao/orientacoes-gerais-para-solicitacoes-1/certificados-de-curso-de-especializacao-e-residencias")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/academicos/pos-graduacao/orientacoes-gerais-para-solicitacoes-1/diplomas-de-mestrado-e-doutorado")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    loader = WebBaseLoader("http://www.daa.uem.br/diploma-digital")
+    document = loader.load()
+    document_chunks += text_splitter.split_documents(document)
+
+    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings())
+
+    return vector_store
 
 def get_vectorstore_from_url(url):
     # get the text in document form
@@ -29,7 +230,7 @@ def get_vectorstore_from_url(url):
     return vector_store
 
 def get_context_retriever_chain(vector_store):
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(openai_api_key=st.secrets("OPENAI_API_KEY"))
     
     retriever = vector_store.as_retriever()
     
@@ -45,7 +246,7 @@ def get_context_retriever_chain(vector_store):
     
 def get_conversational_rag_chain(retriever_chain): 
     
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(openai_api_key=st.secrets("OPENAI_API_KEY"))
     
     prompt = ChatPromptTemplate.from_messages([
       ("system", "Answer the user's questions based on the below context:\n\n{context}"),
@@ -68,11 +269,11 @@ def get_response(user_input):
     
     return response['answer']
 
+
 # app config
 st.set_page_config(page_title="Converse com a DAA", page_icon="🤖")
 st.title("Converse com a DAA")
 
-website_url = "http://www.daa.uem.br"
 # sidebar
 # with st.sidebar:
 #     st.header("DAA")
@@ -90,7 +291,7 @@ if "chat_history" not in st.session_state:
         AIMessage(content="Olá, eu sou o robô da DAA. Como posso te ajudar?"),
     ]
 if "vector_store" not in st.session_state:
-    st.session_state.vector_store = get_vectorstore_from_url(website_url)
+    st.session_state.vector_store = get_vectorstore_from_url_test()
 
 # user input
 user_query = st.chat_input("Escreva sua pergunta aqui...")
@@ -98,8 +299,6 @@ if user_query is not None and user_query != "":
     response = get_response(user_query)
     st.session_state.chat_history.append(HumanMessage(content=user_query))
     st.session_state.chat_history.append(AIMessage(content=response))
-
-
 
 # conversation
 for message in st.session_state.chat_history:
