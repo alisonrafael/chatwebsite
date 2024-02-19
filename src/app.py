@@ -226,7 +226,7 @@ def get_vectorstore_from_url(url):
     document_chunks = text_splitter.split_documents(document)
     
     # create a vectorstore from the chunks
-    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings())
+    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY))
 
     return vector_store
 
