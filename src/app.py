@@ -3,6 +3,7 @@
 
 import streamlit as st
 import os
+import dill as pickle
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -10,12 +11,13 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.chains import create_history_aware_retriever, create_retrieval_chain
+from langchain.chains import create_history_aware_retriever, create_retrieval_chain, ConversationalRetrievalChain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
 load_dotenv()
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+PERSIST = False
 
 def get_vectorstore_from_url_daa():
     text_splitter = RecursiveCharacterTextSplitter()
@@ -248,15 +250,17 @@ def get_context_retriever_chain(vector_store):
 def get_conversational_rag_chain(retriever_chain):
     
     llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
-    
+
+    #question = "Answer the user's questions based on the below context and do not give me any information about procedures and service features that are not mentioned in the provided context:"
+    question_to_chatopenai = "Responda a pergunta do usuário baseado no contexto abaixo e se a resposta não estiver no contexto diga que você só sabe coisas da Diretoria de Assuntos Acadêmicos da UEM: "
+
     prompt = ChatPromptTemplate.from_messages([
-      ("system", "Answer the user's questions based on the below context:\n\n{context}"),
+      ("system", question_to_chatopenai + "\n\n{context}"),
       MessagesPlaceholder(variable_name="chat_history"),
       ("user", "{input}"),
     ])
     
     stuff_documents_chain = create_stuff_documents_chain(llm,prompt)
-    
     return create_retrieval_chain(retriever_chain, stuff_documents_chain)
 
 def get_response(user_input):
@@ -270,8 +274,7 @@ def get_response(user_input):
     
     return response['answer']
 
-
-# app config
+print("Iniciando...")
 st.set_page_config(page_title="Converse com a DAA", page_icon="🤖")
 st.title("Converse com a DAA")
 
@@ -286,13 +289,31 @@ st.title("Converse com a DAA")
 #
 # else:
 
-# session state
+
 if "chat_history" not in st.session_state:
+    print("Criando histórico de conversas...")
     st.session_state.chat_history = [
         AIMessage(content="Olá, eu sou o robô da DAA. Como posso te ajudar?"),
     ]
+else:
+    print("Usando histórico de conversas da sessão...")
+
+#if "vector_store" not in st.session_state:
+#    st.session_state.vector_store = get_vectorstore_from_url_daa()
+
+# se não temos na sessão a base de conhecimento, carregamos do disco ou criamos novamente
 if "vector_store" not in st.session_state:
-    st.session_state.vector_store = get_vectorstore_from_url_daa()
+    print("Criando conhecimento...")
+    if PERSIST and os.path.exists(PERSIST):
+        #st.session_state.vector_store = from disk
+        print("A base de conhecimento foi carregada de uma já existente")
+    else:
+        print("Populando uma nova base de conhecimento...")
+        st.session_state.vector_store = get_vectorstore_from_url_daa()
+        # save st.session_state.vector_store to disk
+        print("Nova base de conhecimento criada")
+else:
+    print("Usando base de conhecimento da sessão")
 
 # user input
 user_query = st.chat_input("Escreva sua pergunta aqui...")
