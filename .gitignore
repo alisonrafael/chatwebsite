@@ -36,3 +36,6 @@ nbdist/
 .DS_Store
 .env
 .streamlit/
+*.pkl
+*.bin
+*.parquet

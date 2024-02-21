@@ -1,5 +1,5 @@
 # instale as bibliotecas com pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb
-# crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???"
+# crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???" e PERSISTENT_VECTORSTORE = "False"
 
 import streamlit as st
 import os
