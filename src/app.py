@@ -70,7 +70,7 @@ def get_conversational_rag_chain(retriever_chain):
     llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
 
     # question = "Answer the user's questions based on the below context and do not give me any information about procedures and service features that are not mentioned in the provided context:"
-    question_to_chatopenai = "Responda a pergunta do usuário baseado no contexto abaixo e se a resposta não estiver no contexto diga que você só sabe coisas da Diretoria de Assuntos Acadêmicos da UEM: "
+    question_to_chatopenai = "Responda a pergunta do usuário baseado no contexto abaixo. Caso a pergunta seja de conhecimentos que não pertence à Diretoria de Assuntos Acadêmicos da UEM diga que você só sabe questões relacionadas à Diretoria de Assuntos Acadêmicos da UEM: "
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", question_to_chatopenai + "\n\n{context}"),
