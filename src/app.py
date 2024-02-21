@@ -3,7 +3,7 @@
 
 import streamlit as st
 import os
-import dill as pickle
+
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -13,11 +13,13 @@ from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain, ConversationalRetrievalChain
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from chromadb.config import Settings
 
 load_dotenv()
 
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PERSIST = False
+PERSIST_PATH = "./"
 
 def get_vectorstore_from_url_daa():
     text_splitter = RecursiveCharacterTextSplitter()
@@ -214,7 +216,7 @@ def get_vectorstore_from_url_daa():
     document = loader.load()
     document_chunks += text_splitter.split_documents(document)
 
-    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings())
+    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY), client_settings=Settings(chroma_db_impl='duckdb+parquet', persist_directory=PERSIST_PATH, anonymized_telemetry=False))
 
     return vector_store
 
@@ -228,7 +230,7 @@ def get_vectorstore_from_url(url):
     document_chunks = text_splitter.split_documents(document)
     
     # create a vectorstore from the chunks
-    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY))
+    vector_store = Chroma.from_documents(document_chunks, OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY), client_settings=Settings(chroma_db_impl='duckdb+parquet', persist_directory=PERSIST_PATH, anonymized_telemetry=False))
 
     return vector_store
 
@@ -304,13 +306,16 @@ else:
 # se não temos na sessão a base de conhecimento, carregamos do disco ou criamos novamente
 if "vector_store" not in st.session_state:
     print("Criando conhecimento...")
-    if PERSIST and os.path.exists(PERSIST):
-        #st.session_state.vector_store = from disk
+    if PERSIST:
+        #load st.session_state.vector_store from disk
+        vector_store = Chroma(OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY), client_settings=Settings(chroma_db_impl='duckdb+parquet', persist_directory=PERSIST_PATH, anonymized_telemetry=False))
+        st.session_state.vector_store = vector_store.get()['documents']
         print("A base de conhecimento foi carregada de uma já existente")
     else:
         print("Populando uma nova base de conhecimento...")
         st.session_state.vector_store = get_vectorstore_from_url_daa()
         # save st.session_state.vector_store to disk
+        st.session_state.vector_store.persist()
         print("Nova base de conhecimento criada")
 else:
     print("Usando base de conhecimento da sessão")
