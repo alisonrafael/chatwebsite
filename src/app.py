@@ -1,4 +1,4 @@
-# instale as bibliotecas com pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb sentence-transformers unstructured image pdfminer.six pillow-heif
+# instale as bibliotecas de requirements.txt com pip install
 # crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???" e PERSISTENT_VECTORSTORE = "False"
 
 import streamlit as st
@@ -14,17 +14,15 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from chromadb.config import Settings
-from langchain_community.document_loaders import DirectoryLoader
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.document_loaders import OnlinePDFLoader
 
 
 load_dotenv()
 
+
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PERSISTENT_VECTORSTORE = os.environ["PERSISTENT_VECTORSTORE"]
 PERSISTENT_VECTORSTORE_DIR = "./"
-path = os.path.dirname(__file__)
 
 
 def init_llm():
