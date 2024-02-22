@@ -24,6 +24,7 @@ load_dotenv()
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PERSISTENT_VECTORSTORE = os.environ["PERSISTENT_VECTORSTORE"]
 PERSISTENT_VECTORSTORE_DIR = "./"
+path = os.path.dirname(__file__)
 
 
 def init_llm():
@@ -39,7 +40,7 @@ def get_documents_from_pdfs_from_file():
 
     print("Processando PDFs de arquivo...")
     document_chunks = None
-    file_pdfs = open('./pdfs.txt', 'r')
+    file_pdfs = open(path + '/pdfs.txt', 'r')
     lines = file_pdfs.readlines()
     for line in lines:
         print("Carregando o conteúdo de {}...".format(line.strip()))
@@ -58,7 +59,7 @@ def get_documents_from_urls_from_file():
 
     print("Processando URLs de arquivo...")
     document_chunks = None
-    file_urls = open('./urls.txt', 'r')
+    file_urls = open(path + '/urls.txt', 'r')
     lines = file_urls.readlines()
     for line in lines:
         print("Carregando o conteúdo de {}...".format(line.strip()))
