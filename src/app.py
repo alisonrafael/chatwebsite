@@ -23,7 +23,7 @@ load_dotenv()
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PERSISTENT_VECTORSTORE = os.environ["PERSISTENT_VECTORSTORE"]
 PERSISTENT_VECTORSTORE_DIR = "./"
-
+FILE_PATH = os.environ["FILE_PATH"]
 
 def init_llm():
     return ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0.6, model_name="gpt-3.5-turbo")
@@ -38,7 +38,7 @@ def get_documents_from_pdfs_from_file():
 
     print("Processando PDFs de arquivo...")
     document_chunks = None
-    file_pdfs = open('pdfs.txt', 'r')
+    file_pdfs = open(FILE_PATH + 'pdfs.txt', 'r')
     lines = file_pdfs.readlines()
     for line in lines:
         print("Carregando o conteúdo de {}...".format(line.strip()))
@@ -57,7 +57,7 @@ def get_documents_from_urls_from_file():
 
     print("Processando URLs de arquivo...")
     document_chunks = None
-    file_urls = open('/mount/src/chatwebsite/src/urls.txt', 'r')
+    file_urls = open(FILE_PATH + 'urls.txt', 'r')
     lines = file_urls.readlines()
     for line in lines:
         print("Carregando o conteúdo de {}...".format(line.strip()))
