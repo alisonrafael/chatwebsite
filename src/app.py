@@ -57,7 +57,7 @@ def get_documents_from_urls_from_file():
 
     print("Processando URLs de arquivo...")
     document_chunks = None
-    file_urls = open('urls.txt', 'r')
+    file_urls = open('/mount/src/chatwebsite/src/urls.txt', 'r')
     lines = file_urls.readlines()
     for line in lines:
         print("Carregando o conteúdo de {}...".format(line.strip()))
