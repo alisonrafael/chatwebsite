@@ -1,4 +1,4 @@
-# instale as bibliotecas com pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb
+# instale as bibliotecas com pip install streamlit langchain lanchain-openai beautifulsoup4 python-dotenv chromadb sentence-transformers unstructured image pdfminer.six pillow-heif
 # crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???" e PERSISTENT_VECTORSTORE = "False"
 
 import streamlit as st
@@ -11,12 +11,13 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.chains import create_history_aware_retriever, create_retrieval_chain, VectorDBQA
+from langchain.chains import create_history_aware_retriever, create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from chromadb.config import Settings
-from langchain_openai import OpenAI
-from langchain.chains import RetrievalQA
-from langchain.retrievers.self_query.base import SelfQueryRetriever
+from langchain_community.document_loaders import DirectoryLoader
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.document_loaders import OnlinePDFLoader
+
 
 load_dotenv()
 
@@ -24,15 +25,43 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 PERSISTENT_VECTORSTORE = os.environ["PERSISTENT_VECTORSTORE"]
 PERSISTENT_VECTORSTORE_DIR = "./"
 
-def get_vectorstore_from_urls_from_file():
+
+def init_llm():
+    return ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0.6, model_name="gpt-3.5-turbo")
+
+
+def init_embeddings():
+    return OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+
+
+def get_documents_from_pdfs_from_file():
+    text_splitter = RecursiveCharacterTextSplitter()
+
+    print("Processando PDFs de arquivo...")
+    document_chunks = None
+    file_pdfs = open('pdfs.txt', 'r')
+    lines = file_pdfs.readlines()
+    for line in lines:
+        print("Carregando o conteúdo de {}...".format(line.strip()))
+        loader = OnlinePDFLoader(line.strip())
+        document = loader.load()
+        if document_chunks is None:
+            document_chunks = text_splitter.split_documents(document)
+        else:
+            document_chunks += text_splitter.split_documents(document)
+
+    return document_chunks
+
+
+def get_documents_from_urls_from_file():
     text_splitter = RecursiveCharacterTextSplitter()
 
     print("Processando URLs de arquivo...")
     document_chunks = None
-    file1 = open('urls.txt', 'r')
-    lines = file1.readlines()
+    file_urls = open('urls.txt', 'r')
+    lines = file_urls.readlines()
     for line in lines:
-        print("Obtendo dados de {}".format(line.strip()))
+        print("Carregando o conteúdo de {}...".format(line.strip()))
         loader = WebBaseLoader(line.strip())
         document = loader.load()
         if document_chunks is None:
@@ -40,17 +69,11 @@ def get_vectorstore_from_urls_from_file():
         else:
             document_chunks += text_splitter.split_documents(document)
 
-    vector_store = Chroma.from_documents(documents=document_chunks,
-                                         embedding=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY),
-                                         client_settings=Settings(chroma_db_impl='duckdb+parquet',
-                                                                  persist_directory=PERSISTENT_VECTORSTORE_DIR,
-                                                                  anonymized_telemetry=False))
-    print("Fim do processamento de URLs de arquivo")
-    return vector_store
+    return document_chunks
 
 
 def get_context_retriever_chain(vector_store):
-    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
+    llm = init_llm()
 
     retriever = vector_store.as_retriever()
 
@@ -67,14 +90,15 @@ def get_context_retriever_chain(vector_store):
 
 
 def get_conversational_rag_chain(retriever_chain):
-    llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY)
+    llm = init_llm()
 
-    # question = "Answer the user's questions based on the below context and do not give me any information about procedures and service features that are not mentioned in the provided context:"
-    # question_to_chatopenai = "Responda a pergunta do usuário baseado no contexto abaixo. Caso a pergunta seja de conhecimentos que não pertence à Diretoria de Assuntos Acadêmicos da UEM diga que você só sabe questões relacionadas à Diretoria de Assuntos Acadêmicos da UEM: "
-    question_to_chatopenai = "You are a support resource that answers questions about X and the integration of X. If the question is not about X, how to use X, or cannot be answered based on the context, return the specific message saying that you know only about Diretoria de Assuntos Acadêmicos, do not make up an answer"
+    # question_to_chatgpt = "Answer the user's questions based on the below context and do not give me any information about procedures and service features that are not mentioned in the provided context:"
+    # question_to_chatgpt = "Responda a pergunta do usuário baseado no contexto abaixo. Caso a pergunta seja de conhecimentos que não pertence à Diretoria de Assuntos Acadêmicos da UEM diga que você só sabe questões relacionadas à Diretoria de Assuntos Acadêmicos da UEM: "
+    # question_to_chatgpt = "You are a support resource that answers questions about X and the integration of X. If the question is not about X, how to use X, or cannot be answered based on the context, return the specific message saying that you know only about Diretoria de Assuntos Acadêmicos, do not make up an answer"
+    question_to_chatgpt = "You are a support resource that answers questions about X and the integration of X based on the below context: "
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", question_to_chatopenai + "\n\n{context}"),
+        ("system", question_to_chatgpt + "\n\n{context}"),
         MessagesPlaceholder(variable_name="chat_history"),
         ("user", "{input}"),
     ])
@@ -98,14 +122,14 @@ def get_response(user_input):
 print("Iniciando...")
 st.set_page_config(page_title="Converse com a DAA", page_icon="🤖")
 st.title("Converse com a DAA")
-
-st.markdown("""<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">""", unsafe_allow_html=True)
-aviso = """
-       <div class="text-muted mb-3">
-       Desenvolvido com OpenAI como parte integrante do SigaUEM (Sistema de Informações Gerenciais Acadêmicas) do NPD (Núcleo de Processamentos de dados) da UEM (Universidade Estadual de Maringá)
-       </div>
-       """
-st.markdown(aviso, unsafe_allow_html=True)
+st.markdown("""
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+            """, unsafe_allow_html=True)
+st.markdown("""
+           <div class="text-muted mb-3">
+           Desenvolvido com OpenAI como parte integrante do SigaUEM (Sistema de Informações Gerenciais Acadêmicas) do NPD (Núcleo de Processamentos de dados) da UEM (Universidade Estadual de Maringá)
+           </div>
+           """, unsafe_allow_html=True)
 
 # exemplo de sidebar
 # with st.sidebar:
@@ -128,14 +152,23 @@ else:
 
 if "vector_store" not in st.session_state:
     print("Criando conhecimento...")
-    if PERSISTENT_VECTORSTORE:
+    if PERSISTENT_VECTORSTORE.lower() == "true":
         print("Carregando base de conhecimento local...")
         st.session_state.vector_store = Chroma(persist_directory=PERSISTENT_VECTORSTORE_DIR,
-                                               embedding_function=OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY))
+                                               embedding_function=init_embeddings())
         print("A base de conhecimento foi carregada de uma já existente")
     else:
         print("Populando uma nova base de conhecimento...")
-        st.session_state.vector_store = get_vectorstore_from_urls_from_file()
+        document_chunks_from_urls = get_documents_from_urls_from_file()
+        document_chunks_from_pdfs = get_documents_from_pdfs_from_file()
+        document_chunks = document_chunks_from_urls + document_chunks_from_pdfs
+
+        st.session_state.vector_store = Chroma.from_documents(documents=document_chunks,
+                                                              embedding=init_embeddings(),
+                                                              client_settings=Settings(chroma_db_impl='duckdb+parquet',
+                                                                                       persist_directory=PERSISTENT_VECTORSTORE_DIR,
+                                                                                       anonymized_telemetry=False))
+
         st.session_state.vector_store.persist()
         print("Nova base de conhecimento criada")
 else:
