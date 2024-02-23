@@ -1,5 +1,5 @@
 # instale as bibliotecas de requirements.txt com pip install
-# crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???" e PERSISTENT_VECTORSTORE = "False"
+# crie o arquivo .streamlit/secrets.toml dentro da pasta src com a variável OPENAI_API_KEY="???", PERSISTENT_VECTORSTORE = "False" e  FILE_PATH = "./"
 
 import streamlit as st
 import os
@@ -41,7 +41,7 @@ def get_documents_from_pdfs_from_file():
     file_pdfs = open(FILE_PATH + 'pdfs.txt', 'r')
     lines = file_pdfs.readlines()
     for line in lines:
-        print("Carregando o conteúdo de {}...".format(line.strip()))
+        print("Carregando o conteúdo do PDF {}...".format(line.strip()))
         loader = OnlinePDFLoader(line.strip())
         document = loader.load()
         if document_chunks is None:
@@ -49,6 +49,7 @@ def get_documents_from_pdfs_from_file():
         else:
             document_chunks += text_splitter.split_documents(document)
 
+    print("Processamento de PDFs finalizado")
     return document_chunks
 
 
@@ -60,7 +61,7 @@ def get_documents_from_urls_from_file():
     file_urls = open(FILE_PATH + 'urls.txt', 'r')
     lines = file_urls.readlines()
     for line in lines:
-        print("Carregando o conteúdo de {}...".format(line.strip()))
+        print("Carregando o conteúdo da URL {}...".format(line.strip()))
         loader = WebBaseLoader(line.strip())
         document = loader.load()
         if document_chunks is None:
@@ -68,6 +69,7 @@ def get_documents_from_urls_from_file():
         else:
             document_chunks += text_splitter.split_documents(document)
 
+    print("Processamento de URLs finalizado")
     return document_chunks
 
 
