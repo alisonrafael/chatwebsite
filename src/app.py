@@ -122,7 +122,7 @@ def get_response(user_input):
 
 print("Iniciando...")
 st.set_page_config(page_title="Converse com a DAA", page_icon="🤖")
-st.title("Converse com a DAA")
+#st.title("Converse com a DAA")
 st.markdown("""
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
             """, unsafe_allow_html=True)
@@ -152,7 +152,6 @@ else:
     print("Usando histórico de conversas da sessão")
 
 if "vector_store" not in st.session_state:
-    print("Criando conhecimento...")
     if PERSISTENT_VECTORSTORE.lower() == "true":
         print("Carregando base de conhecimento local...")
         st.session_state.vector_store = Chroma(persist_directory=PERSISTENT_VECTORSTORE_DIR,
